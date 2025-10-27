@@ -1,7 +1,7 @@
-# AutoApplyHub
+# Job-MCP
 
 ## Overview
-AutoApplyHub is a web application for CS students to streamline job applications. Users create profiles, upload resumes, track application stats (e.g., applications sent, responses, success rates), and manage preferences. An AI-powered MCP (Model Completion Provider) parses resume/profile data using Claude API and automates job applications via browser automation on supported sites (e.g., LinkedIn, Indeed). The website is for setup and management, with the MCP handling background tasks.
+Job-MCP is a web application for CS students to streamline job applications. Users create profiles, upload resumes, track application stats (e.g., applications sent, responses, success rates), and manage preferences. An AI-powered MCP (Model Completion Provider) parses resume/profile data using Claude API and automates job applications via browser automation on supported sites (e.g., LinkedIn, Indeed). The website is for setup and management, with the MCP handling background tasks.
 
 This project prioritizes ethical automation: complies with site TOS where possible, requires user consent, and includes rate limits.
 
@@ -30,8 +30,8 @@ This project prioritizes ethical automation: complies with site TOS where possib
 ## Setup Instructions
 1. **Clone the Repo**:
    ```
-   git clone https://github.com/yourusername/autoapplyhub.git
-   cd autoapplyhub
+   git clone https://github.com/yourusername/Job-MCP.git
+   cd Job-MCP
    ```
 2. **Frontend Setup** (in `/frontend`):
    ```
