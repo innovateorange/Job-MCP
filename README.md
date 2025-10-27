@@ -22,33 +22,51 @@ This project prioritizes ethical automation: complies with site TOS where possib
 - **Deployment**: Vercel (Frontend), Render/Railway (Backend), Supabase
 
 ## Prerequisites
-- Node.js >= 18
-- Python >= 3.10
-- Accounts: Supabase, Anthropic (Claude API key), Redis
-- Git
+- **Node.js** >= 18 (for Next.js frontend)
+- **Python** >= 3.10 (for FastAPI backend)
+- **Redis** (for Celery task queue)
+- **Git**
+- **Accounts**: 
+  - Supabase (database, auth, storage)
+  - Anthropic (Claude API key)
 
 ## Setup Instructions
-1. **Clone the Repo**:
-   ```
-   git clone https://github.com/yourusername/Job-MCP.git
-   cd Job-MCP
-   ```
-2. **Frontend Setup** (in `/frontend`):
-   ```
-   cd frontend
-   npm install
-   cp .env.example .env.local
-   npm run dev  # Runs on http://localhost:3000
-   ```
-3. **Backend Setup** (in `/backend`):
-   ```
-   cd backend
-   python -m venv venv
-   source venv/bin/activate
-   pip install -r requirements.txt
-   cp .env.example .env
-   uvicorn main:app --reload  # Runs on http://localhost:8000
-   ```
+
+### 1. Clone the Repository
+```bash
+git clone https://github.com/innovateorange/Job-MCP.git
+cd Job-MCP
+```
+
+### 2. Frontend Setup
+```bash
+cd frontend
+npm install
+# Create .env.local with your Supabase credentials:
+# NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+# NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+npm run dev  # Runs on http://localhost:3000
+```
+
+### 3. Backend Setup
+```bash
+# From project root
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+pip install -r requirements.txt
+
+# Install Playwright browsers
+playwright install
+
+# Create .env file in backend/ with:
+# ANTHROPIC_API_KEY=your_api_key
+# SUPABASE_URL=your_supabase_url
+# SUPABASE_KEY=your_supabase_key
+# REDIS_URL=redis://localhost:6379
+
+cd backend
+uvicorn app.main:app --reload  # Runs on http://localhost:8000
+```
 4. **Celery Worker** (for MCP):
    ```
    celery -A tasks worker --loglevel=info
