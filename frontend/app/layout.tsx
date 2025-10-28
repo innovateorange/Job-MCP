@@ -1,5 +1,6 @@
 import type { Metadata } from 'next';
 import './globals.css';
+import Navbar from '@/components/Navbar';
 
 export const metadata: Metadata = {
   title: 'Job-MCP - Land Your Dream CS Job',
@@ -13,7 +14,10 @@ export default function RootLayout({
 }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <body className="antialiased">
+        <Navbar />
+        <main className="pt-16">{children}</main>
+      </body>
     </html>
   );
 }
