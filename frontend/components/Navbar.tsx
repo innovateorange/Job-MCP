@@ -27,7 +27,7 @@ export default function Navbar() {
       }`}
     >
       <div className="max-w-7xl mx-auto px-6">
-        <div className="flex items-center justify-between h-16">
+        <div className="flex items-center justify-between h-16 relative">
           {/* Logo */}
           <Link href="/" className="flex items-center space-x-2 hover:opacity-80 transition-opacity">
             <div className="text-xl font-semibold text-white">
@@ -35,8 +35,8 @@ export default function Navbar() {
             </div>
           </Link>
 
-          {/* Center Navigation */}
-          <div className="hidden md:flex items-center space-x-8">
+          {/* Center Navigation - Absolutely positioned to center of screen */}
+          <div className="hidden md:flex items-center space-x-8 absolute left-1/2 -translate-x-1/2">
             <Link
               href="/features"
               className="text-sm font-medium text-white/70 hover:text-white transition-colors"
