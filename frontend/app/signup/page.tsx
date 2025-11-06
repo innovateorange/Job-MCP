@@ -2,21 +2,50 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState(false);
+  const router = useRouter();
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     
-    // Mockup - just simulate a delay
-    setTimeout(() => {
+    try {
+      const { data, error: signUpError } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/dashboard`,
+        },
+      });
+
+      if (signUpError) throw signUpError;
+
+      if (data.user) {
+        setSuccess(true);
+        // Check if email confirmation is required
+        if (data.user.identities && data.user.identities.length === 0) {
+          setError('This email is already registered. Please sign in instead.');
+        } else {
+          // Redirect to dashboard after successful signup
+          setTimeout(() => {
+            router.push('/dashboard');
+          }, 1500);
+        }
+      }
+    } catch (err: any) {
+      setError(err.message || 'An error occurred during sign up');
+    } finally {
       setLoading(false);
-      alert('Sign up functionality will be connected when backend is ready!');
-    }, 1000);
+    }
   };
 
   return (
@@ -31,6 +60,18 @@ export default function SignUpPage() {
           <div className="relative backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 md:p-10">
             <h1 className="text-3xl font-semibold text-white mb-2">Create Account</h1>
             <p className="text-white/60 mb-8">Get started with Job-MCP</p>
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+                {error}
+              </div>
+            )}
+
+            {success && (
+              <div className="mb-4 p-3 bg-green-500/10 border border-green-500/20 rounded-lg text-green-400 text-sm">
+                Account created successfully! Redirecting to dashboard...
+              </div>
+            )}
 
             <form onSubmit={handleSignUp} className="space-y-6">
               {/* Email Input */}

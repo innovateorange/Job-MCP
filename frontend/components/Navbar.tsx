@@ -2,13 +2,15 @@
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import LiquidGlassButton from './LiquidGlassButton';
+import { supabase } from '@/lib/supabase';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
-  // Set to false to show Sign In/Sign Up buttons (mockup mode)
-  // Set to true to show Dashboard button
-  const isSignedIn = false;
+  const [isSignedIn, setIsSignedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState('');
+  const router = useRouter();
 
   useEffect(() => {
     const handleScroll = () => {
@@ -17,6 +19,29 @@ export default function Navbar() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    // Check initial auth state
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setIsSignedIn(!!session);
+      setUserEmail(session?.user?.email || '');
+    });
+
+    // Listen for auth changes
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setIsSignedIn(!!session);
+      setUserEmail(session?.user?.email || '');
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    router.push('/');
+  };
 
   return (
     <nav
@@ -54,16 +79,24 @@ export default function Navbar() {
           {/* Right Actions */}
           <div className="flex items-center space-x-4">
             {isSignedIn ? (
-              // Signed In: Show Dashboard
-              <Link
-                href="/dashboard"
-                className="flex items-center space-x-2 text-sm font-medium text-white hover:opacity-80 transition-opacity"
-              >
-                <span>Dashboard</span>
-                <span className="px-1.5 py-0.5 text-xs font-medium bg-white/10 text-white rounded border border-white/20">
-                  D
-                </span>
-              </Link>
+              // Signed In: Show Dashboard and Sign Out
+              <>
+                <Link
+                  href="/dashboard"
+                  className="flex items-center space-x-2 text-sm font-medium text-white hover:opacity-80 transition-opacity"
+                >
+                  <span className="hidden md:inline">Dashboard</span>
+                  <span className="px-2 py-1 text-xs font-medium bg-white/10 text-white rounded border border-white/20">
+                    {userEmail.charAt(0).toUpperCase()}
+                  </span>
+                </Link>
+                <button
+                  onClick={handleSignOut}
+                  className="text-sm font-medium text-white/70 hover:text-white transition-colors"
+                >
+                  Sign Out
+                </button>
+              </>
             ) : (
               // Not Signed In: Show Sign In / Sign Up with Liquid Glass
               <>

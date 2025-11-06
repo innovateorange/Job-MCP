@@ -2,21 +2,38 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import { supabase } from '@/lib/supabase';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const router = useRouter();
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
+    setError('');
     
-    // Mockup - just simulate a delay
-    setTimeout(() => {
+    try {
+      const { data, error: signInError } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (signInError) throw signInError;
+
+      if (data.user) {
+        // Redirect to dashboard after successful login
+        router.push('/dashboard');
+      }
+    } catch (err: any) {
+      setError(err.message || 'Invalid email or password');
+    } finally {
       setLoading(false);
-      alert('Login functionality will be connected when backend is ready!');
-    }, 1000);
+    }
   };
 
   return (
@@ -31,6 +48,12 @@ export default function LoginPage() {
           <div className="relative backdrop-blur-xl bg-white/5 border border-white/10 rounded-3xl p-8 md:p-10">
             <h1 className="text-3xl font-semibold text-white mb-2">Welcome Back</h1>
             <p className="text-white/60 mb-8">Sign in to your account</p>
+
+            {error && (
+              <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
+                {error}
+              </div>
+            )}
 
             <form onSubmit={handleLogin} className="space-y-6">
               {/* Email Input */}
