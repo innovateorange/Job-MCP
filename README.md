@@ -42,9 +42,11 @@ cd Job-MCP
 ```bash
 cd frontend
 npm install
-# Create .env.local with your Supabase credentials:
-# NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
-# NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
+# Create frontend/.env.local with your Supabase credentials:
+NEXT_PUBLIC_SUPABASE_URL=your_supabase_url
+NEXT_PUBLIC_SUPABASE_ANON_KEY=your_supabase_anon_key
+
 npm run dev  # Runs on http://localhost:3000
 ```
 
@@ -77,9 +79,9 @@ uvicorn app.main:app --reload  # Runs on http://localhost:8000
    - Enable pgvector.
    - Configure RLS.
 6. **Deployment**:
-   - Frontend: Vercel (connect GitHub).
-   - Backend: Render/Railway with Docker.
-   - Set environment variables.
+   - Frontend + API proxy: Vercel (connect GitHub). The provided `vercel.json` builds the Next.js app from `frontend/` via `@vercel/next` and mounts the FastAPI server under `/api` via `api/index.py`.
+   - Backend (long-running workers): Render/Railway with Docker.
+   - Set environment variables in Vercel (`NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`) and in your backend host (`SUPABASE_URL`, `SUPABASE_KEY`, etc.).
 
 ## Usage
 - Sign up/login via Supabase Auth.
