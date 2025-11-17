@@ -32,7 +32,7 @@ export default function SupportPage() {
                 </h3>
                 <p className="text-white/70">
                   We currently support LinkedIn, Indeed, and several other major job boards. 
-                  We're constantly adding support for more platforms.
+                  We&apos;re constantly adding support for more platforms.
                 </p>
               </div>
               
@@ -51,7 +51,7 @@ export default function SupportPage() {
           <section>
             <h2 className="text-2xl font-semibold text-white mb-4">Contact Support</h2>
             <p className="text-white/80 mb-4">
-              Can't find what you're looking for? Reach out to our support team:
+              Can&apos;t find what you&apos;re looking for? Reach out to our support team:
             </p>
             <div className="bg-white/5 border border-white/10 rounded-lg p-6">
               <p className="text-white/80">
