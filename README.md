@@ -78,6 +78,12 @@ uvicorn app.main:app --reload  # Runs on http://localhost:8000
    - Set up tables: `users`, `profiles`, `applications`, `preferences`.
    - Enable pgvector.
    - Configure RLS.
+   - **Google OAuth Setup** (for Google sign-in):
+     - Go to Authentication > Providers in your Supabase dashboard
+     - Enable Google provider
+     - Add your Google OAuth credentials (Client ID and Client Secret)
+     - Set the redirect URL to: `https://your-project-ref.supabase.co/auth/v1/callback`
+     - For local development, also add: `http://localhost:3000/auth/callback`
 6. **Deployment**:
    - Frontend + API proxy: Vercel (connect GitHub). The provided `vercel.json` builds the Next.js app from `frontend/` via `@vercel/next` and mounts the FastAPI server under `/api` via `api/index.py`.
    - Backend (long-running workers): Render/Railway with Docker.
