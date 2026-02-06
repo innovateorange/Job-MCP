@@ -52,14 +52,15 @@ export default function LoginPage() {
     } catch (err: any) {
       let errorMessage = 'Failed to sign in with Google';
       
-      // Check for specific error about provider not being enabled
-      if (err.message?.includes('provider is not enabled') || err.error_code === 'validation_failed') {
+      // Check for specific error about provider not being enabled (Supabase AuthError uses .code)
+      if (err.message?.includes('provider is not enabled') || err.code === 'validation_failed') {
         errorMessage = 'Google sign-in is not enabled. Please enable it in your Supabase dashboard under Authentication > Providers.';
       } else if (err.message) {
         errorMessage = err.message;
       }
       
       setError(errorMessage);
+    } finally {
       setLoading(false);
     }
   };
