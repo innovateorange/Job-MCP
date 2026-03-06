@@ -1,0 +1,50 @@
+# LoRA Fine-Tune Config — Cover Letter Generation
+# Base: Llama 3.2 3B Instruct
+# =================================================
+#
+# Datasets:
+#   - ShashiVish/cover-letter-dataset (1,162 examples)
+#   - dhruvvaidh/cover-letter-dataset-llama3 (Llama3-formatted)
+#
+# Download data first:
+#   python finetune/scripts/download_datasets.py --task cover_letter
+
+base_model: "meta-llama/Llama-3.2-3B-Instruct"
+task: cover_letter
+
+train_data: "finetune/data/cover_letter_train.jsonl"
+val_data: "finetune/data/cover_letter_val.jsonl"
+
+lora_r: 64
+lora_alpha: 128
+lora_dropout: 0.05
+target_modules:
+  - q_proj
+  - k_proj
+  - v_proj
+  - o_proj
+  - gate_proj
+  - up_proj
+  - down_proj
+
+# Cover letters need more epochs due to smaller dataset (~1K examples)
+num_epochs: 6
+per_device_train_batch_size: 4
+per_device_eval_batch_size: 4
+gradient_accumulation_steps: 4
+learning_rate: 1.5e-4
+weight_decay: 0.01
+warmup_ratio: 0.1         # longer warmup for small dataset
+lr_scheduler: cosine
+max_seq_length: 4096
+packing: false             # cover letters are longer, packing can truncate
+quantize_4bit: true
+bf16: true
+
+logging_steps: 10
+save_steps: 100
+eval_steps: 100
+seed: 42
+report_to: none
+
+output_dir: "outputs/cover-letter-lora"
