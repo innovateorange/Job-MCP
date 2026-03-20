@@ -10,6 +10,7 @@ __pycache__/
 venv/
 env/
 .venv/
+**/.venv/
 
 # Environment variables
 .env
@@ -42,3 +43,9 @@ logs/
 .coverage
 htmlcov/
 .pytest_cache/
+
+# Local tooling and workspace artifacts
+.agents/
+supabase/
+frontend/supabase/
+skills-lock.json
