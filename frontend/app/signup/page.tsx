@@ -5,19 +5,75 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 
+function passwordChecks(password: string) {
+  return [
+    {
+      key: 'length',
+      label: 'At least 7 characters',
+      met: password.length >= 7,
+    },
+    {
+      key: 'number',
+      label: 'At least 1 number (0-9)',
+      met: /[0-9]/.test(password),
+    },
+    {
+      key: 'upper',
+      label: 'At least 1 uppercase letter (A-Z)',
+      met: /[A-Z]/.test(password),
+    },
+    {
+      key: 'lower',
+      label: 'At least 1 lowercase letter (a-z)',
+      met: /[a-z]/.test(password),
+    },
+    {
+      key: 'special',
+      label: 'At least 1 special character (e.g. ! @ # $)',
+      met: /[^A-Za-z0-9]/.test(password),
+    },
+  ];
+}
+
 export default function SignUpPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+  const [error, setError] = useState<{ kind: 'text'; message: string } | null>(null);
   const [success, setSuccess] = useState(false);
   const router = useRouter();
+
+  const checks = passwordChecks(password);
+  const allPasswordChecksMet = checks.every((c) => c.met);
+  const passwordsMatch = password.length > 0 && password === confirmPassword;
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
-    
+    setError(null);
+
+    if (!allPasswordChecksMet) {
+      setError({
+        kind: 'text',
+        message: 'Please update your password to meet all requirements shown below.',
+      });
+      setLoading(false);
+      return;
+    }
+
+    if (!passwordsMatch) {
+      setError({
+        kind: 'text',
+        message: 'Passwords do not match. Please confirm the same password in both fields.',
+      });
+      setLoading(false);
+      return;
+    }
+
     try {
       const { data, error: signUpError } = await supabase.auth.signUp({
         email,
@@ -33,7 +89,10 @@ export default function SignUpPage() {
         setSuccess(true);
         // Check if email confirmation is required
         if (data.user.identities && data.user.identities.length === 0) {
-          setError('This email is already registered. Please sign in instead.');
+          setError({
+            kind: 'text',
+            message: 'This email is already registered. Please sign in instead.',
+          });
         } else {
           // Redirect to dashboard after successful signup
           setTimeout(() => {
@@ -42,7 +101,7 @@ export default function SignUpPage() {
         }
       }
     } catch (err: any) {
-      setError(err.message || 'An error occurred during sign up');
+      setError({ kind: 'text', message: err.message || 'An error occurred during sign up' });
     } finally {
       setLoading(false);
     }
@@ -50,7 +109,7 @@ export default function SignUpPage() {
 
   const handleGoogleSignUp = async () => {
     setLoading(true);
-    setError('');
+    setError(null);
     
     try {
       const { error: signUpError } = await supabase.auth.signInWithOAuth({
@@ -71,7 +130,7 @@ export default function SignUpPage() {
         errorMessage = err.message;
       }
       
-      setError(errorMessage);
+      setError({ kind: 'text', message: errorMessage });
     } finally {
       setLoading(false);
     }
@@ -90,9 +149,9 @@ export default function SignUpPage() {
             <h1 className="text-3xl font-semibold text-white mb-2">Create Account</h1>
             <p className="text-white/60 mb-8">Get started with Job-MCP</p>
 
-            {error && (
+            {error?.kind === 'text' && (
               <div className="mb-4 p-3 bg-red-500/10 border border-red-500/20 rounded-lg text-red-400 text-sm">
-                {error}
+                {error.message}
               </div>
             )}
 
@@ -124,16 +183,67 @@ export default function SignUpPage() {
                 <label htmlFor="password" className="block text-sm font-medium text-white/80 mb-2">
                   Password
                 </label>
-                <input
-                  id="password"
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                  className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all"
-                  placeholder="••••••••"
-                />
+                <div className="relative">
+                  <input
+                    id="password"
+                    type={showPassword ? 'text' : 'password'}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    minLength={7}
+                    autoComplete="new-password"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all pr-24"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1 text-xs font-semibold rounded-lg bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 transition-colors disabled:opacity-50"
+                  >
+                    {showPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+
+                <div className="mt-3">
+                  <div className="text-xs font-medium text-white/70 mb-2">Password requirements</div>
+                  <div className="space-y-1">
+                    {checks.map((c) => (
+                      <label key={c.key} className="flex items-start gap-2 cursor-default select-none">
+                        <input type="checkbox" checked={c.met} readOnly className="mt-0.5" />
+                        <span className={c.met ? 'line-through text-white/50' : 'text-white/70'}>{c.label}</span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <label htmlFor="confirmPassword" className="block text-sm font-medium text-white/80 mb-2">
+                  Confirm password
+                </label>
+                <div className="relative">
+                  <input
+                    id="confirmPassword"
+                    type={showConfirmPassword ? 'text' : 'password'}
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    required
+                    autoComplete="new-password"
+                    className="w-full px-4 py-3 bg-white/5 border border-white/10 rounded-xl text-white placeholder-white/40 focus:outline-none focus:border-white/30 focus:bg-white/10 transition-all pr-24"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmPassword((v) => !v)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1 text-xs font-semibold rounded-lg bg-white/5 border border-white/10 text-white/80 hover:bg-white/10 transition-colors disabled:opacity-50"
+                  >
+                    {showConfirmPassword ? 'Hide' : 'Show'}
+                  </button>
+                </div>
+
+                {confirmPassword.length > 0 && !passwordsMatch && (
+                  <div className="mt-2 text-xs text-red-400">Passwords don&apos;t match.</div>
+                )}
               </div>
 
               {/* Submit Button */}
