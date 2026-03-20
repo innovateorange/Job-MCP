@@ -1,0 +1,25 @@
+#!/usr/bin/env sh
+
+# Block committing local-only or generated artifacts.
+set -eu
+
+staged_files="$(git diff --cached --name-only)"
+
+if [ -z "${staged_files}" ]; then
+  exit 0
+fi
+
+forbidden_pattern='(^|/)(\.venv|venv|env)/|(^|/)\.agents/|^supabase/|^frontend/supabase/|^skills-lock\.json$|(^|/)node_modules/|(^|/)\.next/'
+
+if printf '%s\n' "${staged_files}" | grep -E "${forbidden_pattern}" >/dev/null 2>&1; then
+  echo ""
+  echo "Commit blocked: staged files include local-only/generated paths."
+  echo "Remove them from staging and commit again."
+  echo ""
+  printf '%s\n' "${staged_files}" | grep -E "${forbidden_pattern}" || true
+  echo ""
+  echo "Tip: use 'git restore --staged <path>' to unstage unwanted files."
+  exit 1
+fi
+
+exit 0
