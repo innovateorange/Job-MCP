@@ -1,0 +1,82 @@
+ats,slug,company_name,tech_jobs,total_jobs
+greenhouse,spacex,SpaceX,976,1546
+greenhouse,databricks,Databricks,580,837
+greenhouse,cloudflare,Cloudflare,319,533
+greenhouse,anthropic,Anthropic,256,431
+greenhouse,okta,Okta,246,378
+greenhouse,mongodb,MongoDB,244,442
+greenhouse,stripe,Stripe,236,491
+greenhouse,datadog,Datadog,209,437
+greenhouse,coreweave,CoreWeave,187,263
+greenhouse,samsara,Samsara,134,393
+greenhouse,verkada,Verkada,131,301
+greenhouse,elastic,Elastic,130,215
+greenhouse,adyen,Adyen,129,303
+greenhouse,airbnb,Airbnb,126,254
+greenhouse,scaleai,Scale AI,117,167
+greenhouse,coinbase,Coinbase,114,189
+greenhouse,lucidmotors,Lucid Motors,108,231
+greenhouse,affirm,Affirm,107,156
+greenhouse,intercom,Intercom,104,194
+greenhouse,robinhood,Robinhood,95,149
+greenhouse,oscar,Oscar Health,92,285
+greenhouse,riotgames,Riot Games,90,174
+greenhouse,lyft,Lyft,87,160
+greenhouse,brex,Brex,86,252
+greenhouse,fivetran,Fivetran ,86,162
+greenhouse,braze,Braze,86,180
+greenhouse,gitlab,GitLab,82,171
+greenhouse,twilio,Twilio,76,140
+greenhouse,jfrog,JFrog,75,125
+greenhouse,asana,Asana,73,150
+greenhouse,discord,Discord,58,83
+greenhouse,instacart,Instacart,57,135
+greenhouse,lightspeedhq,Lightspeed Commerce,56,173
+greenhouse,figma,Figma,49,157
+greenhouse,abnormalsecurity,Abnormal,42,97
+greenhouse,vercel,Vercel,41,77
+greenhouse,vonage,Vonage,38,73
+greenhouse,faire,Faire,37,73
+greenhouse,twitch,Twitch,34,73
+lever,coupa,coupa,34,96
+greenhouse,chime,"Chime Financial, Inc",33,65
+greenhouse,epicgames,Epic Games,33,67
+greenhouse,flexport,Flexport,29,128
+greenhouse,iterable,Iterable,27,48
+greenhouse,airtable,Airtable,26,58
+greenhouse,peloton,Peloton,26,54
+greenhouse,opendoor,Opendoor,25,55
+greenhouse,webflow,Webflow,24,51
+greenhouse,newrelic,New Relic,23,56
+greenhouse,duolingo,Duolingo,22,89
+greenhouse,bandwidth,Bandwidth,21,42
+greenhouse,algolia,Algolia,20,29
+greenhouse,nextdoor,Nextdoor,20,35
+greenhouse,squarespace,Squarespace,19,32
+lever,outreach,outreach,19,35
+greenhouse,marqeta,Marqeta,18,28
+greenhouse,mixpanel,Mixpanel,18,48
+greenhouse,launchdarkly,LaunchDarkly,17,38
+greenhouse,amplitude,Amplitude ,16,44
+greenhouse,thumbtack,Thumbtack,16,32
+greenhouse,creditkarma,Credit Karma,16,17
+greenhouse,mirakl,Mirakl,14,27
+greenhouse,commercetools,commercetools,14,25
+greenhouse,betterment,Betterment,14,31
+greenhouse,udemy,Udemy,13,36
+greenhouse,cockroachlabs,Cockroach Labs,10,29
+lever,metabase,metabase,9,16
+greenhouse,circleci,CircleCI,8,12
+lever,pipedrive,pipedrive,8,33
+greenhouse,lattice,Lattice,6,11
+greenhouse,pagerduty,PagerDuty,6,49
+greenhouse,labelbox,Labelbox,5,6
+lever,clari,clari,5,5
+greenhouse,planetscale,PlanetScale,4,5
+greenhouse,pendo,Pendo,3,20
+greenhouse,linkedin,LI Test Company,3,53
+lever,linkedin,linkedin,3,16
+lever,15five,15five,2,5
+greenhouse,netlify,Netlify,1,3
+greenhouse,roofstock,Roofstock,1,44
+greenhouse,blend,Blend,1,9
