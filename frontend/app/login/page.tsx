@@ -30,7 +30,14 @@ export default function LoginPage() {
         router.push('/dashboard');
       }
     } catch (err: any) {
-      setError(err.message || 'Invalid email or password');
+      const m = err?.message ?? String(err);
+      if (m === 'Failed to fetch' || err?.name === 'TypeError') {
+        setError(
+          'Cannot reach Supabase. Check your network, and that this site’s deployment has NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY set in Vercel.'
+        );
+      } else {
+        setError(m || 'Invalid email or password');
+      }
     } finally {
       setLoading(false);
     }
@@ -44,7 +51,7 @@ export default function LoginPage() {
       const { error: signInError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 

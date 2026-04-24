@@ -79,7 +79,7 @@ export default function SignUpPage() {
         email,
         password,
         options: {
-          emailRedirectTo: `${window.location.origin}/dashboard`,
+          emailRedirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
@@ -101,7 +101,16 @@ export default function SignUpPage() {
         }
       }
     } catch (err: any) {
-      setError({ kind: 'text', message: err.message || 'An error occurred during sign up' });
+      const m = err?.message ?? String(err);
+      if (m === 'Failed to fetch' || err?.name === 'TypeError') {
+        setError({
+          kind: 'text',
+          message:
+            'Cannot reach Supabase. Check your network, and that this site’s deployment has NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY set in Vercel.',
+        });
+      } else {
+        setError({ kind: 'text', message: m || 'An error occurred during sign up' });
+      }
     } finally {
       setLoading(false);
     }
@@ -115,22 +124,28 @@ export default function SignUpPage() {
       const { error: signUpError } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          redirectTo: `${window.location.origin}/dashboard`,
+          redirectTo: `${window.location.origin}/auth/callback`,
         },
       });
 
       if (signUpError) throw signUpError;
     } catch (err: any) {
-      let errorMessage = 'Failed to sign up with Google';
-      
-      // Check for specific error about provider not being enabled (Supabase AuthError uses .code)
-      if (err.message?.includes('provider is not enabled') || err.code === 'validation_failed') {
-        errorMessage = 'Google sign-in is not enabled. Please enable it in your Supabase dashboard under Authentication > Providers.';
-      } else if (err.message) {
-        errorMessage = err.message;
+      const m = err?.message ?? String(err);
+      if (m === 'Failed to fetch' || err?.name === 'TypeError') {
+        setError({
+          kind: 'text',
+          message:
+            'Cannot reach Supabase. Check your network, and that this site’s deployment has NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY set in Vercel.',
+        });
+      } else {
+        let errorMessage = 'Failed to sign up with Google';
+        if (m.includes('provider is not enabled') || err.code === 'validation_failed') {
+          errorMessage = 'Google sign-in is not enabled. Please enable it in your Supabase dashboard under Authentication > Providers.';
+        } else if (m) {
+          errorMessage = m;
+        }
+        setError({ kind: 'text', message: errorMessage });
       }
-      
-      setError({ kind: 'text', message: errorMessage });
     } finally {
       setLoading(false);
     }

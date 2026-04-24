@@ -1,0 +1,26 @@
+# ── Fine-Tuning Dependencies ───────────────────────────────────────────
+# Install these ONLY on your training machine, not in production.
+#
+#   pip install -r finetune/requirements-finetune.txt
+#
+# Note: some packages (unsloth, bitsandbytes) require CUDA.
+
+# Core training
+torch>=2.1.0
+transformers>=4.44.0
+datasets>=2.19.0
+accelerate>=0.30.0
+trl>=0.9.0                       # SFTTrainer
+peft>=0.11.0                     # LoRA adapters
+bitsandbytes>=0.43.0             # QLoRA / 4-bit quantisation
+
+# Fast training (optional but recommended)
+# unsloth                        # Uncomment if you have CUDA — 2x faster LoRA
+
+# Evaluation & data
+scikit-learn>=1.4.0
+pyyaml>=6.0
+
+# Model serving
+# vllm>=0.5.0                    # Uncomment for vLLM serving
+# text-generation-inference      # Uncomment for HF TGI

@@ -1,6 +1,5 @@
 # Dependencies
 node_modules/
-frontend/node_modules/
 
 # Python
 __pycache__/
@@ -10,7 +9,8 @@ __pycache__/
 .Python
 venv/
 env/
-ENV/
+.venv/
+**/.venv/
 
 # Environment variables
 .env
@@ -19,7 +19,6 @@ ENV/
 
 # Next.js
 .next/
-frontend/.next/
 out/
 build/
 dist/
@@ -39,3 +38,14 @@ Thumbs.db
 *.log
 logs/
 
+# Test / generated artifacts
+*_analysis.json
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Local tooling and workspace artifacts
+.agents/
+supabase/
+frontend/supabase/
+skills-lock.json
