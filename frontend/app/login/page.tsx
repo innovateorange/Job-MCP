@@ -57,15 +57,19 @@ export default function LoginPage() {
 
       if (signInError) throw signInError;
     } catch (err: any) {
-      let errorMessage = 'Failed to sign in with Google';
-      
-      // Check for specific error about provider not being enabled (Supabase AuthError uses .code)
-      if (err.message?.includes('provider is not enabled') || err.code === 'validation_failed') {
-        errorMessage = 'Google sign-in is not enabled. Please enable it in your Supabase dashboard under Authentication > Providers.';
-      } else if (err.message) {
-        errorMessage = err.message;
+      const m = err?.message ?? String(err);
+      if (m === 'Failed to fetch' || err?.name === 'TypeError') {
+        setError(
+          'Cannot reach Supabase. Check your network, and that this site’s deployment has NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY set in Vercel.'
+        );
+        return;
       }
-      
+      let errorMessage = 'Failed to sign in with Google';
+      if (m.includes('provider is not enabled') || err.code === 'validation_failed') {
+        errorMessage = 'Google sign-in is not enabled. Please enable it in your Supabase dashboard under Authentication > Providers.';
+      } else if (m) {
+        errorMessage = m;
+      }
       setError(errorMessage);
     } finally {
       setLoading(false);
