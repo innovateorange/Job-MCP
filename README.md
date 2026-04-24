@@ -571,7 +571,7 @@ redis-server
 
 ### Frontend + API Proxy (Vercel)
 
-`vercel.json` builds the Next.js app and mounts FastAPI under `/api`. Connect your GitHub repo to Vercel, set env vars, and deploy.
+`vercel.json` deploys the Next.js app from `frontend/` only (the monolithic FastAPI + LangChain + Playwright + PaddleOCR stack is too large for Vercel’s Python bundle; run the API with Docker/Render/Railway as below). Connect your GitHub repo to Vercel, set env vars, and deploy.
 
 ### Backend Workers (Render / Railway)
 
