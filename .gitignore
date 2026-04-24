@@ -49,3 +49,4 @@ htmlcov/
 supabase/
 frontend/supabase/
 skills-lock.json
+.vercel
