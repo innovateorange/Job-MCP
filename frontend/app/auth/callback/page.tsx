@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 /**
  * Finishes Google OAuth. The Supabase client reads tokens from the redirect URL
@@ -13,7 +14,7 @@ export default function AuthCallbackPage() {
   const [message, setMessage] = useState('Signing in…');
 
   useEffect(() => {
-    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event: AuthChangeEvent, session: Session | null) => {
       if (session && (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED')) {
         listener.subscription.unsubscribe();
         router.replace('/dashboard');

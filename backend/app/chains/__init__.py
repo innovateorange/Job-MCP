@@ -15,7 +15,6 @@ from backend.app.chains.skill_chain import build_skill_chain
 from backend.app.chains.job_match_chain import build_job_match_chain
 from backend.app.chains.cover_letter_chain import build_cover_letter_chain
 from backend.app.chains.resume_writer_chain import build_resume_writer_chain
-from backend.app.chains.apply_agent import build_apply_agent
 
 __all__ = [
     "build_resume_chain",
@@ -23,5 +22,4 @@ __all__ = [
     "build_job_match_chain",
     "build_cover_letter_chain",
     "build_resume_writer_chain",
-    "build_apply_agent",
 ]
