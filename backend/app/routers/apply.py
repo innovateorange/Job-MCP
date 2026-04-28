@@ -14,7 +14,7 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from backend.app.tasks.celery_app import celery_app
+from backend.tasks.celery_app import celery_app
 from backend.app.services.supabase_client import get_supabase_client
 
 router = APIRouter(prefix="/apply", tags=["apply"])

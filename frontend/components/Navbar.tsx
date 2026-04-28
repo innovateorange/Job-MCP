@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import LiquidGlassButton from './LiquidGlassButton';
 import { supabase } from '@/lib/supabase';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -22,7 +23,8 @@ export default function Navbar() {
 
   useEffect(() => {
     // Check initial auth state
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data }: { data: { session: Session | null } }) => {
+      const { session } = data;
       setIsSignedIn(!!session);
       setUserEmail(session?.user?.email || '');
     });
@@ -30,7 +32,7 @@ export default function Navbar() {
     // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
       setIsSignedIn(!!session);
       setUserEmail(session?.user?.email || '');
     });
@@ -79,13 +81,30 @@ export default function Navbar() {
           {/* Right Actions */}
           <div className="flex items-center space-x-4">
             {isSignedIn ? (
-              // Signed In: Show Dashboard and Sign Out
+              // Signed In: Show app nav and Sign Out
               <>
+                <Link
+                  href="/dashboard"
+                  className="hidden sm:block text-sm font-medium text-white/70 hover:text-white transition-colors"
+                >
+                  Dashboard
+                </Link>
+                <Link
+                  href="/apply"
+                  className="hidden sm:block text-sm font-medium text-white/70 hover:text-white transition-colors"
+                >
+                  Auto-apply
+                </Link>
+                <Link
+                  href="/profile"
+                  className="hidden sm:block text-sm font-medium text-white/70 hover:text-white transition-colors"
+                >
+                  Profile
+                </Link>
                 <Link
                   href="/dashboard"
                   className="flex items-center space-x-2 text-sm font-medium text-white hover:opacity-80 transition-opacity"
                 >
-                  <span className="hidden md:inline">Dashboard</span>
                   <span className="px-2 py-1 text-xs font-medium bg-white/10 text-white rounded border border-white/20">
                     {userEmail.charAt(0).toUpperCase()}
                   </span>
