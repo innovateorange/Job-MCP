@@ -7,6 +7,7 @@ python-multipart==0.0.12
 # ── LangChain Core ─────────────────────────────────────────────────────
 langchain>=0.3.0
 langchain-core>=0.3.0
+langchain-text-splitters>=0.3.0
 
 # ── LLM Providers (install the ones you need) ──────────────────────────
 langchain-anthropic>=0.3.1       # Anthropic Claude
@@ -27,6 +28,9 @@ paddleocr>=2.7.0
 
 # ── Database ───────────────────────────────────────────────────────────
 supabase==2.9.1
+
+# ── Testing ───────────────────────────────────────────────────────────
+pytest>=7.4.0
 
 # ── Job scraper (scripts/) ─────────────────────────────────────────────
 requests>=2.31.0
