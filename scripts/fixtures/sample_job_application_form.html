@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>Sample job application (POC)</title>
+    <style>
+      body {
+        font-family: system-ui, sans-serif;
+        max-width: 520px;
+        margin: 2rem auto;
+        padding: 1rem;
+        line-height: 1.5;
+      }
+      label {
+        display: block;
+        margin-top: 0.75rem;
+        font-weight: 600;
+      }
+      input[type='text'],
+      input[type='email'],
+      input[type='tel'] {
+        width: 100%;
+        padding: 0.5rem;
+        margin-top: 0.25rem;
+      }
+      #done {
+        display: none;
+        margin-top: 1rem;
+        padding: 0.75rem;
+        background: #ecfdf5;
+        border: 1px solid #10b981;
+        color: #065f46;
+        border-radius: 8px;
+      }
+      .err {
+        color: #b91c1c;
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Demo Job Application</h1>
+    <p>Static form used by <code>scripts/playwright_job_application_poc.py</code> — not a real employer.</p>
+
+    <form id="application-form" action="#" method="post" enctype="multipart/form-data">
+      <label for="fullname">Full name</label>
+      <input id="fullname" name="fullname" type="text" autocomplete="name" />
+
+      <label for="email">Email</label>
+      <input id="email" name="email" type="email" autocomplete="email" />
+
+      <label for="phone">Phone</label>
+      <input id="phone" name="phone" type="tel" autocomplete="tel" />
+
+      <label for="resume">Resume (PDF)</label>
+      <input id="resume" name="resume" type="file" accept=".pdf" />
+      <div id="resume-err" class="err" style="display: none">Please attach a PDF resume.</div>
+
+      <label for="cover">Cover letter</label>
+      <input id="cover" name="cover" type="file" accept=".pdf,.txt" />
+      <div id="cover-err" class="err" style="display: none">Please attach a cover letter file.</div>
+
+      <label style="font-weight: 500; margin-top: 1rem">
+        <input id="agree" name="agree" type="checkbox" /> I certify this submission is truthful.
+      </label>
+
+      <button id="submit-btn" type="submit" style="margin-top: 1.25rem; padding: 0.6rem 1rem">
+        Submit application
+      </button>
+
+      <div id="done">Thank you — your demo application was received.</div>
+    </form>
+
+    <script>
+      document.getElementById('application-form').addEventListener('submit', function (e) {
+        e.preventDefault();
+        var resume = document.getElementById('resume');
+        var cover = document.getElementById('cover');
+        var agree = document.getElementById('agree');
+        var ok = true;
+        if (!resume.files || !resume.files.length) {
+          document.getElementById('resume-err').style.display = 'block';
+          ok = false;
+        } else document.getElementById('resume-err').style.display = 'none';
+        if (!cover.files || !cover.files.length) {
+          document.getElementById('cover-err').style.display = 'block';
+          ok = false;
+        } else document.getElementById('cover-err').style.display = 'none';
+        if (!agree.checked) ok = false;
+        if (!ok) return false;
+        document.getElementById('done').style.display = 'block';
+        document.getElementById('submit-btn').disabled = true;
+        return false;
+      });
+    </script>
+  </body>
+</html>
