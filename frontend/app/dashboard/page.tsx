@@ -1,8 +1,11 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
+import { getApiBaseUrl } from '@/lib/api';
+import type { AuthChangeEvent, Session } from '@supabase/supabase-js';
 
 type DashboardJob = {
   id: string;
@@ -16,46 +19,8 @@ type DashboardJob = {
   status: 'auto_applied' | 'follow_up_required' | 'completed';
 };
 
-const DEMO_JOBS: DashboardJob[] = [
-  {
-    id: 'demo-1',
-    company: 'Vercel',
-    title: 'Frontend Engineer Intern',
-    location: 'Remote (US)',
-    source: 'LinkedIn',
-    autoAppliedAt: new Date(Date.now() - 1000 * 60 * 60 * 4).toISOString(),
-    requiresFollowUp: true,
-    followUpConfirmed: false,
-    status: 'follow_up_required',
-  },
-  {
-    id: 'demo-2',
-    company: 'Stripe',
-    title: 'Software Engineer, New Grad',
-    location: 'San Francisco, CA',
-    source: 'Company Careers',
-    autoAppliedAt: new Date(Date.now() - 1000 * 60 * 60 * 26).toISOString(),
-    requiresFollowUp: false,
-    followUpConfirmed: false,
-    status: 'auto_applied',
-  },
-  {
-    id: 'demo-3',
-    company: 'Notion',
-    title: 'Product Engineer',
-    location: 'New York, NY',
-    source: 'Wellfound',
-    autoAppliedAt: new Date(Date.now() - 1000 * 60 * 60 * 52).toISOString(),
-    requiresFollowUp: true,
-    followUpConfirmed: true,
-    status: 'completed',
-  },
-];
-
-const FOLLOW_UP_STORAGE_KEY = 'job-mcp-follow-up-confirmations';
-
 export default function Dashboard() {
-  const [user, setUser] = useState<any>(null);
+  const [user, setUser] = useState<{ id: string; email?: string } | null>(null);
   const [loading, setLoading] = useState(true);
   const [jobsLoading, setJobsLoading] = useState(true);
   const [jobsError, setJobsError] = useState('');
@@ -70,89 +35,74 @@ export default function Dashboard() {
     return { total, autoApplied, followUpRequired, completed };
   }, [jobs]);
 
-  const getSavedFollowUpMap = () => {
-    if (typeof window === 'undefined') return {} as Record<string, boolean>;
-    try {
-      const saved = window.localStorage.getItem(FOLLOW_UP_STORAGE_KEY);
-      return saved ? (JSON.parse(saved) as Record<string, boolean>) : {};
-    } catch {
-      return {};
-    }
-  };
-
-  const persistFollowUpMap = (map: Record<string, boolean>) => {
-    if (typeof window === 'undefined') return;
-    window.localStorage.setItem(FOLLOW_UP_STORAGE_KEY, JSON.stringify(map));
-  };
-
-  const applySavedFollowUps = (input: DashboardJob[]) => {
-    const savedMap = getSavedFollowUpMap();
-    return input.map((job) => {
-      const savedConfirmed = savedMap[job.id];
-      const followUpConfirmed = typeof savedConfirmed === 'boolean' ? savedConfirmed : job.followUpConfirmed;
-      const status = followUpConfirmed && job.requiresFollowUp ? 'completed' : job.status;
-      return { ...job, followUpConfirmed, status };
-    });
-  };
-
-  const fetchJobs = async (userId: string) => {
+  const fetchJobs = useCallback(async (userId: string) => {
     setJobsLoading(true);
     setJobsError('');
 
-    const { data, error } = await supabase
-      .from('job_applications')
-      .select('id, company, title, location, source, auto_applied_at, requires_follow_up, follow_up_confirmed, status')
-      .eq('user_id', userId)
-      .order('auto_applied_at', { ascending: false });
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/apply/jobs/${userId}`);
+      const data = await res.json().catch(() => ({}));
 
-    if (error) {
-      setJobsError('Live job data unavailable yet. Showing demo spreadsheet rows.');
-      setJobs(applySavedFollowUps(DEMO_JOBS));
+      if (!res.ok) {
+        const d = (data as { detail?: unknown })?.detail;
+        const msg =
+          typeof d === 'string'
+            ? d
+            : res.statusText || 'Failed to load application data from the API.';
+        setJobsError(msg);
+        setJobs([]);
+        return;
+      }
+
+      const rows = (data as { rows?: unknown[] }).rows ?? [];
+      const mapped: DashboardJob[] = (rows as any[]).map((row) => ({
+        id: String(row.id),
+        company: row.company ?? 'Unknown Company',
+        title: row.title ?? 'Untitled Role',
+        location: row.location ?? 'N/A',
+        source: row.source ?? 'Job Board',
+        autoAppliedAt: row.auto_applied_at ?? new Date().toISOString(),
+        requiresFollowUp: Boolean(row.requires_follow_up),
+        followUpConfirmed: Boolean(row.follow_up_confirmed),
+        status:
+          row.status === 'completed' || row.status === 'follow_up_required' || row.status === 'auto_applied'
+            ? row.status
+            : 'auto_applied',
+      }));
+
+      setJobs(mapped);
+    } catch (e) {
+      setJobsError(e instanceof Error ? e.message : 'Network error while loading jobs.');
+      setJobs([]);
+    } finally {
       setJobsLoading(false);
-      return;
     }
+  }, []);
 
-    const mapped: DashboardJob[] = (data ?? []).map((row: any) => ({
-      id: String(row.id),
-      company: row.company ?? 'Unknown Company',
-      title: row.title ?? 'Untitled Role',
-      location: row.location ?? 'N/A',
-      source: row.source ?? 'Job Board',
-      autoAppliedAt: row.auto_applied_at ?? new Date().toISOString(),
-      requiresFollowUp: Boolean(row.requires_follow_up),
-      followUpConfirmed: Boolean(row.follow_up_confirmed),
-      status:
-        row.status === 'completed' || row.status === 'follow_up_required' || row.status === 'auto_applied'
-          ? row.status
-          : 'auto_applied',
-    }));
+  const handleFollowUpToggle = async (jobId: string, wasConfirmed: boolean) => {
+    const followUpConfirmed = !wasConfirmed;
+    setJobsError('');
 
-    setJobs(applySavedFollowUps(mapped));
-    setJobsLoading(false);
-  };
-
-  const handleFollowUpToggle = (jobId: string) => {
-    setJobs((prev) => {
-      const next = prev.map((job) => {
-        if (job.id !== jobId) return job;
-        const followUpConfirmed = !job.followUpConfirmed;
-        const status: DashboardJob['status'] =
-          followUpConfirmed && job.requiresFollowUp
-            ? 'completed'
-            : job.status === 'completed'
-              ? 'follow_up_required'
-              : job.status;
-        return { ...job, followUpConfirmed, status };
+    try {
+      const res = await fetch(`${getApiBaseUrl()}/apply/jobs/${jobId}/follow-up`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ follow_up_confirmed: followUpConfirmed }),
       });
+      const data = await res.json().catch(() => ({}));
 
-      const map = next.reduce<Record<string, boolean>>((acc, job) => {
-        acc[job.id] = job.followUpConfirmed;
-        return acc;
-      }, {});
-      persistFollowUpMap(map);
+      if (!res.ok) {
+        const d = (data as { detail?: unknown })?.detail;
+        setJobsError(typeof d === 'string' ? d : `Update failed (${res.status})`);
+        return;
+      }
 
-      return next;
-    });
+      if (user?.id) {
+        await fetchJobs(user.id);
+      }
+    } catch (e) {
+      setJobsError(e instanceof Error ? e.message : 'Network error');
+    }
   };
 
   const formatDateTime = (input: string) => {
@@ -162,46 +112,59 @@ export default function Dashboard() {
 
   const renderStatus = (job: DashboardJob) => {
     if (job.followUpConfirmed || job.status === 'completed') {
-      return <span className="px-2.5 py-1 rounded-full text-xs bg-emerald-400/20 text-emerald-300 border border-emerald-300/20">Completed</span>;
+      return (
+        <span className="px-2.5 py-1 rounded-full text-xs bg-emerald-400/20 text-emerald-300 border border-emerald-300/20">
+          Completed
+        </span>
+      );
     }
 
     if (job.requiresFollowUp || job.status === 'follow_up_required') {
-      return <span className="px-2.5 py-1 rounded-full text-xs bg-amber-300/20 text-amber-200 border border-amber-300/20">Needs Follow-Up</span>;
+      return (
+        <span className="px-2.5 py-1 rounded-full text-xs bg-amber-300/20 text-amber-200 border border-amber-300/20">
+          Needs Follow-Up
+        </span>
+      );
     }
 
-    return <span className="px-2.5 py-1 rounded-full text-xs bg-sky-400/20 text-sky-300 border border-sky-300/20">Auto-Applied</span>;
+    return (
+      <span className="px-2.5 py-1 rounded-full text-xs bg-sky-400/20 text-sky-300 border border-sky-300/20">
+        Auto-Applied
+      </span>
+    );
   };
 
   useEffect(() => {
     const checkUser = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+
       if (!session) {
         router.push('/login');
         return;
       }
-      
-      setUser(session.user);
+
+      setUser({ id: session.user.id, email: session.user.email });
       await fetchJobs(session.user.id);
       setLoading(false);
     };
 
     checkUser();
 
-    // Listen for auth changes
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((_event: AuthChangeEvent, session: Session | null) => {
       if (!session) {
         router.push('/login');
       } else {
-        setUser(session.user);
+        setUser({ id: session.user.id, email: session.user.email });
         fetchJobs(session.user.id);
       }
     });
 
     return () => subscription.unsubscribe();
-  }, [router]);
+  }, [router, fetchJobs]);
 
   if (loading) {
     return (
@@ -216,7 +179,12 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-4xl font-bold mb-2">Application Grid</h1>
-          <p className="text-white/60">Auto-applied jobs and follow-ups in one spreadsheet view for {user?.email}</p>
+          <p className="text-white/60">
+            Auto-applied jobs and follow-ups in one spreadsheet view for {user?.email}
+          </p>
+          <p className="text-white/40 text-sm mt-2">
+            Data source: <code className="text-white/60">{getApiBaseUrl()}/apply/jobs/&lt;user_id&gt;</code>
+          </p>
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
@@ -250,7 +218,8 @@ export default function Dashboard() {
 
         <div className="backdrop-blur-xl bg-white/5 border border-white/10 rounded-2xl overflow-hidden">
           <div className="px-5 py-4 border-b border-white/10 text-sm text-white/70">
-            Spreadsheet view. Jobs that require extra action are flagged, and you can manually confirm when follow-up is complete.
+            Spreadsheet view. Jobs that require extra action are flagged, and you can manually confirm when follow-up is
+            complete (updates via PATCH on the API).
           </div>
 
           <div className="overflow-x-auto">
@@ -277,7 +246,11 @@ export default function Dashboard() {
                 ) : jobs.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="px-4 py-10 text-center text-white/60">
-                      No jobs yet. As auto-apply runs, new rows will appear here.
+                      No jobs yet. Start from{' '}
+                      <Link href="/apply" className="text-sky-300 underline">
+                        Auto-apply
+                      </Link>{' '}
+                      or wait for the worker to record applications in the database.
                     </td>
                   </tr>
                 ) : (
@@ -287,7 +260,9 @@ export default function Dashboard() {
                       <td className="px-4 py-3 border-b border-white/5">{job.title}</td>
                       <td className="px-4 py-3 border-b border-white/5 text-white/75">{job.location}</td>
                       <td className="px-4 py-3 border-b border-white/5 text-white/75">{job.source}</td>
-                      <td className="px-4 py-3 border-b border-white/5 text-white/75 whitespace-nowrap">{formatDateTime(job.autoAppliedAt)}</td>
+                      <td className="px-4 py-3 border-b border-white/5 text-white/75 whitespace-nowrap">
+                        {formatDateTime(job.autoAppliedAt)}
+                      </td>
                       <td className="px-4 py-3 border-b border-white/5">{renderStatus(job)}</td>
                       <td className="px-4 py-3 border-b border-white/5">
                         <span className={job.requiresFollowUp ? 'text-amber-200' : 'text-white/45'}>
@@ -299,7 +274,7 @@ export default function Dashboard() {
                           <input
                             type="checkbox"
                             checked={job.followUpConfirmed}
-                            onChange={() => handleFollowUpToggle(job.id)}
+                            onChange={() => handleFollowUpToggle(job.id, job.followUpConfirmed)}
                             className="h-4 w-4 rounded border-white/30 bg-transparent"
                           />
                           <span className="text-white/80">Confirmed</span>
