@@ -3,11 +3,11 @@ LangChain Chains — Job-MCP Pipeline
 ====================================
 Each module exposes one or more LCEL chains that compose the full pipeline:
 
-  resume_chain      – parse raw resume text → structured profile JSON
-  skill_chain       – extract / normalize skills from text
-  job_match_chain   – score candidate–job fit
-  cover_letter_chain– generate tailored cover letters
-  apply_agent       – orchestrate browser-based auto-apply via tools
+  resume_chain        – parse raw resume text → structured profile JSON
+  skill_chain         – extract / normalize skills from text
+  job_match_chain     – score candidate–job fit
+  cover_letter_chain  – generate tailored cover letters
+  resume_writer_chain – rewrite a resume tailored to a job description
 """
 
 from backend.app.chains.resume_chain import build_resume_chain
