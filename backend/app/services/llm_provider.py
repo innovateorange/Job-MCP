@@ -67,15 +67,22 @@ def _require_env(key: str) -> str:
 
 def _build_custom(**kwargs) -> BaseChatModel:
     """Custom fine-tuned model served behind an OpenAI-compatible endpoint
-    (e.g. vLLM, TGI, or a hosted fine-tune on Together/Fireworks)."""
+    (e.g. vLLM, TGI, or a hosted fine-tune on Together/Fireworks).
+
+    Reads from Settings so the documented defaults (localhost vLLM) apply
+    without forcing operators to export env vars for a dev-only endpoint.
+    """
     from langchain_openai import ChatOpenAI
 
+    from backend.app.config import get_settings
+
+    s = get_settings()
     return ChatOpenAI(
-        base_url=_require_env("CUSTOM_LLM_BASE_URL"),
-        api_key=_env("CUSTOM_LLM_API_KEY", "not-needed"),
-        model=_env("LLM_MODEL", "fine-tuned-job-mcp"),
-        temperature=kwargs.get("temperature", float(_env("LLM_TEMPERATURE", "0"))),
-        max_tokens=kwargs.get("max_tokens", int(_env("LLM_MAX_TOKENS", "4096"))),
+        base_url=s.custom_llm_base_url,
+        api_key=s.custom_llm_api_key,
+        model=s.llm_model,
+        temperature=kwargs.get("temperature", s.llm_temperature),
+        max_tokens=kwargs.get("max_tokens", s.llm_max_tokens),
     )
 
 

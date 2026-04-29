@@ -91,7 +91,7 @@ def extract_contact_info(text: str) -> dict:
     emails = re.findall(r"\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b", text)
     if emails:
         info["email"] = emails[0]
-    phones = re.findall(r"\b(?:\+?1[-.]?)?\(?([0-9]{3})\)?[-.]?([0-9]{3})[-.]?([0-9]{4})\b", text)
+    phones = re.findall(r"\b(?:\+?1[-.\s]?)?\(?([0-9]{3})\)?[-.\s]?([0-9]{3})[-.\s]?([0-9]{4})\b", text)
     if phones:
         info["phone"] = f"({phones[0][0]}) {phones[0][1]}-{phones[0][2]}"
     return info
